@@ -4,6 +4,7 @@ class RelationX {
     this.parsers = { ...parsers,
       none: e => e
     }
+    this.relation = (object, targets, options) => this.solve({ object, targets, options })
   }
 
   router({ object = {}, targets = [], map = [], preRoute = {} }) {
