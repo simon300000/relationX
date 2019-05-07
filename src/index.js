@@ -55,7 +55,7 @@ class RelationX {
         let targetAPI = this.apis[target]
         let { oneOf = [], demand = [], type } = targetAPI
         this.get({ object, targets: [...demand, ...(oneOf[preRoute[target]] || [])], preRoute }, options)
-        object[target] = (async () => this.parser(await targetAPI.get(Object.assign(...await Promise.all(demand.concat(...oneOf).map(async v => ({
+        object[target] = (async () => this.parser(await targetAPI.get(Object.assign({}, ...await Promise.all(demand.concat(...oneOf).map(async v => ({
           [v]: await object[v]
         })))), options), type, options))()
         // Hiahiahia
@@ -69,7 +69,7 @@ class RelationX {
       throw new Error(`Target route: ${error.join(' -> ')}`)
     }
     this.get({ object, targets, preRoute }, options)
-    return Object.assign(...await Promise.all(Object.keys(object).map(async key => ({
+    return Object.assign({}, ...await Promise.all(Object.keys(object).map(async key => ({
       [key]: await object[key]
     }))))
   }
