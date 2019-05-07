@@ -55,8 +55,9 @@ class RelationX {
       if (!object[target]) {
         let targetAPI = this.apis[target]
         let { oneOf = [], demand = [], type } = targetAPI
-        this.get({ object, targets: [...demand, ...(oneOf[preRoute[target]] || [])], preRoute }, options)
-        object[target] = (async () => this.parser(await targetAPI.get(Object.assign({}, ...await Promise.all(demand.concat(...oneOf).map(async v => ({
+        let oneOfDemand = oneOf[preRoute[target]] || []
+        this.get({ object, targets: [...demand, ...oneOfDemand], preRoute }, options)
+        object[target] = (async () => this.parser(await targetAPI.get(Object.assign({}, ...await Promise.all(demand.concat(...oneOfDemand).map(async v => ({
           [v]: await object[v]
         })))), options), type, options))()
         // Hiahiahia
