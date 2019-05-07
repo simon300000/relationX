@@ -1,6 +1,6 @@
 {
   "name": "relationx",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Promise based Data Driven Javascript Framework",
   "main": "index.js",
   "scripts": {
