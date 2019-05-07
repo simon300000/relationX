@@ -1,0 +1,11 @@
+.gitattributes
+.eslintignore
+.eslintrc.js
+.travis.yml
+.nyc_output/
+
+examples/
+md/
+
+test.js
+test/
