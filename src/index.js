@@ -5,6 +5,13 @@ class RelationX {
       ...parsers,
       _none: e => e
     }
+    Object
+      .values(this.apis)
+      .forEach(({ type }) => {
+        if (type && !this.parsers[type]) {
+          throw new Error(`Unknow Type: ${type}`)
+        }
+      })
     this.relation = (object, targets, options) => this.solve({ object, targets, options })
   }
 

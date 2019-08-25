@@ -85,34 +85,46 @@ describe('RelationX', function() {
       return assert.isFunction(RelationX)
     })
     it('New', function() {
-      let relation = new RelationX({ nodes })
+      let relation = new RelationX({ nodes, parsers })
       return assert.isObject(relation)
     })
     it('relation()', function() {
-      let { relation } = new RelationX({ nodes })
+      let { relation } = new RelationX({ nodes, parsers })
       return assert.isFunction(relation)
     })
     it('solve()', function() {
-      let { solve } = new RelationX({ nodes })
+      let { solve } = new RelationX({ nodes, parsers })
       return assert.isFunction(solve)
     })
   })
 
   context('Route', function() {
     it('throws when no require input', function() {
-      let { relation } = new RelationX({ nodes })
+      let { relation } = new RelationX({ nodes, parsers })
       assert.throws(() => relation({}, ['area']))
     })
     it('throws when unknow target', function() {
-      let { relation } = new RelationX({ nodes })
+      let { relation } = new RelationX({ nodes, parsers })
       assert.throws(() => relation({}, ['simon3000']))
     })
-    it('not throws when no input require', function() {
-      let { relation } = new RelationX({ nodes })
+    it('not throw when no input require', function() {
+      let { relation } = new RelationX({ nodes, parsers })
       assert.doesNotThrow(() => relation({}, ['wow']))
     })
+    it('throws when no parser', function() {
+      assert.throws(() => new RelationX({
+        parsers,
+        nodes: {
+          ...nodes,
+          noParser: {
+            get: () => 233,
+            type: 'notExist'
+          }
+        }
+      }))
+    })
     it('preRoute', function() {
-      let { preRoute } = (new RelationX({ nodes })).router({ object: { x: 2, y: 3 }, targets: ['area'] })
+      let { preRoute } = (new RelationX({ nodes, parsers })).router({ object: { x: 2, y: 3 }, targets: ['area'] })
       return assert.strictEqual(preRoute.area, 0)
     })
   })
