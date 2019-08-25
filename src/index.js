@@ -1,7 +1,8 @@
 class RelationX {
   constructor({ nodes = {}, parsers = {} }) {
     this.apis = nodes
-    this.parsers = { ...parsers,
+    this.parsers = {
+      ...parsers,
       _none: e => e
     }
     this.relation = (object, targets, options) => this.solve({ object, targets, options })
@@ -57,9 +58,7 @@ class RelationX {
         let { oneOf = [], demand = [], type } = targetAPI
         let oneOfDemand = oneOf[preRoute[target]] || []
         this.get({ object, targets: [...demand, ...oneOfDemand], preRoute }, options)
-        object[target] = (async () => this.parser(await targetAPI.get(Object.assign({}, ...await Promise.all(demand.concat(...oneOfDemand).map(async v => ({
-          [v]: await object[v]
-        })))), options), type, options))()
+        object[target] = (async () => this.parser(await targetAPI.get(Object.fromEntries(await Promise.all(demand.concat(...oneOfDemand).map(async v => [v, await object[v]]))), options), type, options))()
         // Hiahiahia
       }
     }
@@ -71,9 +70,7 @@ class RelationX {
       throw new Error(`Target route: ${error.join(' -> ')}`)
     }
     this.get({ object, targets, preRoute }, options)
-    return Object.assign({}, ...await Promise.all(Object.keys(object).map(async key => ({
-      [key]: await object[key]
-    }))))
+    return Object.fromEntries(await Promise.all(Object.keys(object).map(async key => [key, await object[key]])))
   }
 }
 
