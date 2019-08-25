@@ -2,7 +2,7 @@ class RelationX {
   constructor({ nodes = {}, parsers = {} }) {
     this.apis = nodes
     this.parsers = { ...parsers,
-      none: e => e
+      _none: e => e
     }
     this.relation = (object, targets, options) => this.solve({ object, targets, options })
   }
@@ -45,7 +45,7 @@ class RelationX {
     return { preRoute }
   }
 
-  parser(url, type = 'none', options) {
+  parser(url, type = '_none', options) {
     return this.parsers[type](url, options)
   }
 
