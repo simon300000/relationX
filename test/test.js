@@ -4,9 +4,9 @@
 const { RelationX } = require('..')
 
 const chai = require('chai')
-const chaiAsPromised = require('chai-as-promised')
-chai.use(chaiAsPromised)
 const assert = chai.assert
+
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const nodes = {
   area: {
@@ -60,11 +60,23 @@ const nodes = {
   },
   wow: {
     get: () => 233
+  },
+  wowAsyncMassDouble: {
+    demand: ['mass'],
+    type: 'asyncParser',
+    get: async ({ mass }) => {
+      await wait(10)
+      return mass
+    }
   }
 }
 
 const parsers = {
-  kg: num => `${num}kg`
+  kg: num => `${num}kg`,
+  asyncParser: async data => {
+    await wait(10)
+    return `${data}${data}`
+  }
 }
 
 describe('RelationX', function() {
@@ -85,24 +97,26 @@ describe('RelationX', function() {
       return assert.isFunction(solve)
     })
   })
+
   context('Route', function() {
-    it('reject when no require input', function() {
+    it('throws when no require input', function() {
       let { relation } = new RelationX({ nodes })
-      return assert.isRejected(relation({}, ['area']))
+      assert.throws(() => relation({}, ['area']))
     })
-    it('reject when unknow target', function() {
+    it('throws when unknow target', function() {
       let { relation } = new RelationX({ nodes })
-      return assert.isRejected(relation({}, ['simon3000']))
+      assert.throws(() => relation({}, ['simon3000']))
     })
-    it('not reject when no input require', function() {
+    it('not throws when no input require', function() {
       let { relation } = new RelationX({ nodes })
-      return assert.isFulfilled(relation({}, ['wow']))
+      assert.doesNotThrow(() => relation({}, ['wow']))
     })
     it('preRoute', function() {
       let { preRoute } = (new RelationX({ nodes })).router({ object: { x: 2, y: 3 }, targets: ['area'] })
       return assert.strictEqual(preRoute.area, 0)
     })
   })
+
   context('relation', function() {
     let { relation } = new RelationX({ nodes, parsers })
     it('independent value', async function() {
@@ -127,6 +141,7 @@ describe('RelationX', function() {
       let { mass } = await relation({ volume, density }, ['mass'])
       assert.strictEqual(mass, volume * density + 'kg')
     })
+
     context('more', async function() {
       it('mass', async function() {
         let x = 28
@@ -144,6 +159,15 @@ describe('RelationX', function() {
         let { height } = await relation({ x, y, mass, density }, ['height'])
         assert.strictEqual(height, 29 / density / (x * y))
       })
+    })
+
+    it('async', async function() {
+      let density = 3
+      let volume = 30
+      let pending = relation({ density, volume }, ['wowAsyncMassDouble'])
+      assert.instanceOf(pending, Promise)
+      let { wowAsyncMassDouble, mass } = await pending
+      assert.strictEqual(wowAsyncMassDouble, `${mass}${mass}`)
     })
   })
 })
