@@ -1,5 +1,5 @@
 class RelationX {
-  constructor({ nodes = {}, parsers = {} }) {
+  constructor({ nodes, parsers }) {
     this.apis = nodes
     this.parsers = {
       ...parsers,
@@ -12,10 +12,9 @@ class RelationX {
           throw new Error(`Unknow Type: ${type}`)
         }
       })
-    this.relation = (object, targets, options) => this.solve({ object, targets, options })
   }
 
-  router({ object = {}, targets = [], map = [], preRoute = {} }) {
+  router({ object, targets, map = [], preRoute = {} }) {
     for (let i = 0; i < targets.length; i++) {
       let target = targets[i]
       if (!object[target]) {
@@ -57,7 +56,7 @@ class RelationX {
     return this.parsers[type](url, options)
   }
 
-  get({ object, targets = [], preRoute }, options) {
+  async get({ object, targets, preRoute }, options) {
     for (let i = 0; i < targets.length; i++) {
       let target = targets[i]
       if (!object[target]) {
@@ -71,13 +70,13 @@ class RelationX {
     }
   }
 
-  solve({ object = {}, targets = [], options }) {
+  relation = async (object, targets, options) => {
     let { error, preRoute } = this.router({ object, targets })
     if (error) {
       throw new Error(`Target route: ${error.join(' -> ')}`)
     }
     this.get({ object, targets, preRoute }, options)
-    return new Promise(async resolve => resolve(Object.fromEntries(await Promise.all(Object.keys(object).map(async key => [key, await object[key]])))))
+    return Object.fromEntries(await Promise.all(Object.keys(object).map(async key => [key, await object[key]])))
   }
 }
 

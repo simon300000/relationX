@@ -3,8 +3,8 @@
 /* global it */
 const { RelationX } = require('..')
 
-const chai = require('chai')
-const assert = chai.assert
+const { assert } = require('chai')
+const { rejects } = require('assert')
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -92,24 +92,21 @@ describe('RelationX', function() {
       let { relation } = new RelationX({ nodes, parsers })
       return assert.isFunction(relation)
     })
-    it('solve()', function() {
-      let { solve } = new RelationX({ nodes, parsers })
-      return assert.isFunction(solve)
-    })
   })
 
   context('Route', function() {
     it('throws when no require input', function() {
       let { relation } = new RelationX({ nodes, parsers })
-      assert.throws(() => relation({}, ['area']))
+      rejects(relation({}, ['area']))
     })
     it('throws when unknow target', function() {
       let { relation } = new RelationX({ nodes, parsers })
-      assert.throws(() => relation({}, ['simon3000']))
+      rejects(relation({}, ['simon3000']))
     })
-    it('not throw when no input require', function() {
+    it('not throw when no input require', async function() {
       let { relation } = new RelationX({ nodes, parsers })
-      assert.doesNotThrow(() => relation({}, ['wow']))
+      let { wow } = await relation({}, ['wow'])
+      assert.strictEqual(wow, 233)
     })
     it('throws when no parser', function() {
       assert.throws(() => new RelationX({
