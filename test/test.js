@@ -68,20 +68,6 @@ const nodes = {
       await wait(10)
       return mass
     }
-  },
-  wowAsyncMass: {
-    demand: ['mass'],
-    get: async ({ mass }) => {
-      await wait(10)
-      return mass
-    }
-  },
-  wowMassDouble: {
-    demand: ['mass'],
-    type: 'asyncParser',
-    get: ({ mass }) => {
-      return mass
-    }
   }
 }
 
@@ -99,7 +85,7 @@ describe('RelationX', function() {
       return assert.isFunction(RelationX)
     })
     it('New', function() {
-      let relation = new RelationX()
+      let relation = new RelationX({ nodes, parsers })
       return assert.isObject(relation)
     })
     it('relation()', function() {
@@ -145,87 +131,55 @@ describe('RelationX', function() {
 
   context('relation', function() {
     let { relation } = new RelationX({ nodes, parsers })
-    it('independent value', function() {
-      let { wow } = relation({}, ['wow'])
+    it('independent value', async function() {
+      let { wow } = await relation({}, ['wow'])
       assert.strictEqual(wow, 233)
     })
-    it('undefined object', function() {
-      let { wow } = relation(undefined, ['wow'])
-      assert.strictEqual(wow, 233)
-    })
-    it('undefined target', function() {
-      let { wow } = relation({}, undefined)
-      assert.strictEqual(wow, undefined)
-    })
-    it('dependent value', function() {
+    it('dependent value', async function() {
       let x = 2
       let y = 3
-      let { area } = relation({ x, y }, ['area'])
+      let { area } = await relation({ x, y }, ['area'])
       assert.strictEqual(area, x * y)
     })
-    it('oneOf', function() {
+    it('oneOf', async function() {
       let volume = 2
       let height = 3
-      let { area } = relation({ volume, height }, ['area'])
+      let { area } = await relation({ volume, height }, ['area'])
       assert.strictEqual(area, volume / height)
     })
-    it('parsers', function() {
+    it('parsers', async function() {
       let volume = 2
       let density = 3
-      let { mass } = relation({ volume, density }, ['mass'])
+      let { mass } = await relation({ volume, density }, ['mass'])
       assert.strictEqual(mass, volume * density + 'kg')
     })
 
-    context('more', function() {
-      it('mass', function() {
+    context('more', async function() {
+      it('mass', async function() {
         let x = 28
         let y = 8
         let height = 17
         let density = 3
-        let { mass } = relation({ x, y, height, density }, ['mass'])
+        let { mass } = await relation({ x, y, height, density }, ['mass'])
         assert.strictEqual(mass, x * y * height * density + 'kg')
       })
-      it('height', function() {
+      it('height', async function() {
         let x = 28
         let y = 8
         let density = 3
         let mass = '29kg'
-        let { height } = relation({ x, y, mass, density }, ['height'])
+        let { height } = await relation({ x, y, mass, density }, ['height'])
         assert.strictEqual(height, 29 / density / (x * y))
       })
     })
 
-    context('async', function() {
-      it('not async', function() {
-        let density = 3
-        let volume = 30
-        let pending = relation({ density, volume }, ['mass'])
-        assert.notInstanceOf(pending, Promise)
-      })
-      it('async get', async function() {
-        let density = 3
-        let volume = 30
-        let pending = relation({ density, volume }, ['wowAsyncMass'])
-        assert.instanceOf(pending, Promise)
-        let { wowAsyncMass, mass } = await pending
-        assert.strictEqual(wowAsyncMass, mass)
-      })
-      it('async parser', async function() {
-        let density = 3
-        let volume = 30
-        let pending = relation({ density, volume }, ['wowMassDouble'])
-        assert.instanceOf(pending, Promise)
-        let { wowMassDouble, mass } = await pending
-        assert.strictEqual(wowMassDouble, `${mass}${mass}`)
-      })
-      it('async get async parser', async function() {
-        let density = 3
-        let volume = 30
-        let pending = relation({ density, volume }, ['wowAsyncMassDouble'])
-        assert.instanceOf(pending, Promise)
-        let { wowAsyncMassDouble, mass } = await pending
-        assert.strictEqual(wowAsyncMassDouble, `${mass}${mass}`)
-      })
+    it('async', async function() {
+      let density = 3
+      let volume = 30
+      let pending = relation({ density, volume }, ['wowAsyncMassDouble'])
+      assert.instanceOf(pending, Promise)
+      let { wowAsyncMassDouble, mass } = await pending
+      assert.strictEqual(wowAsyncMassDouble, `${mass}${mass}`)
     })
   })
 })
