@@ -101,6 +101,7 @@ class RelationX {
     if (error) {
       throw new Error(`Target route: ${error.join(' -> ')}`)
     }
+    console.log(optional)
     this.get({ object, targets: [...optional, ...targets], preRoute, isAsync }, options)
     if (isAsync || options.async) {
       return new Promise(async resolve => resolve(Object.fromEntries(await Promise.all(Object.entries(object).map(async ([key, value]) => [key, await value])))))
