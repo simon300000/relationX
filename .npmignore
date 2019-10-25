@@ -9,3 +9,7 @@ md/
 
 test.js
 test/
+
+**/*.ts
+!**/*.d.ts
+.github
