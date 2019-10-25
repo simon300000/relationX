@@ -2,14 +2,14 @@
 .eslintignore
 .eslintrc.js
 .travis.yml
-.nyc_output/
+.nyc_output/**/*
 
 examples/
 md/
 
 test.js
-test/
 
 **/*.ts
 !**/*.d.ts
+test/**/*
 .github
