@@ -82,17 +82,6 @@ const nodes = {
     get: ({ mass }) => {
       return mass
     }
-  },
-  repeatGetter: {
-    demand: ['x'],
-    get: ({ x }) => x
-  },
-  optionalMass: {
-    demand: ['wowAsyncMass'],
-    optional: ['repeatGetter'],
-    get: ({ wowAsyncMass, repeatGetter = 1 }) => {
-      return wowAsyncMass.repeat(repeatGetter)
-    }
   }
 }
 
@@ -185,14 +174,6 @@ describe('RelationX', function() {
       let density = 3
       let { mass } = relation({ volume, density }, ['mass'])
       assert.strictEqual(mass, volume * density + 'kg')
-    })
-    it('optional', async function() {
-      const { optionalMass } = await relation({ x: 2, y: 10, height: 10, density: 2 }, ['optionalMass'])
-      assert.strictEqual(optionalMass, '400kg400kg')
-    })
-    it('optional is undefined', async function() {
-      const { optionalMass } = await relation({ area: 20, height: 10, density: 2 }, ['optionalMass'])
-      assert.strictEqual(optionalMass, '400kg')
     })
 
     context('more', function() {

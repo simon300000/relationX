@@ -17,7 +17,7 @@ class RelationX {
     this.relation = (object, targets, options) => this.solve({ object, targets, options })
   }
 
-  router({ object, targets, map = [], preRoute = {}, isAsync = false, optional = [] }) {
+  router({ object, targets, map = [], preRoute = {}, isAsync = false }) {
     for (let i = 0; i < targets.length; i++) {
       let target = targets[i]
       if (!object[target]) {
@@ -32,22 +32,11 @@ class RelationX {
           isAsync = isAsync || this.parsers[this.apis[target].type] instanceof AsyncFunction
         }
         if (this.apis[target].demand) {
-          let { error, isAsync: isChildAsync, optional: childOptional } = this.router({ object, targets: this.apis[target].demand, map: [...map, target], preRoute, isAsync, optional })
+          let { error, isAsync: isChildAsync } = this.router({ object, targets: this.apis[target].demand, map: [...map, target], preRoute, isAsync })
           if (error) {
             return { error: [target, ...error] }
           } else {
             isAsync = isChildAsync
-            optional = [...optional, ...childOptional]
-          }
-        }
-        if (this.apis[target].optional) {
-          for (let optionIndex = 0; optionIndex < this.apis[target].optional.length; optionIndex++) {
-            const option = this.apis[target].optional[optionIndex]
-            let { error, isAsync: isChildAsync, optional: childOptional } = this.router({ object, targets: [option], map: [...map, target], preRoute, isAsync, optional })
-            if (!error) {
-              isAsync = isChildAsync
-              optional = [...optional, option, ...childOptional]
-            }
           }
         }
 
@@ -55,11 +44,10 @@ class RelationX {
         if (oneOf) {
           let errors = []
           for (let j = 0; j < oneOf.length && preRoute[target] === undefined; j++) {
-            let { error, isAsync: isChildAsync, optional: childOptional } = this.router({ object, targets: oneOf[j], map: [...map, target], preRoute, isAsync, optional })
+            let { error, isAsync: isChildAsync } = this.router({ object, targets: oneOf[j], map: [...map, target], preRoute, isAsync })
             if (!error) {
               preRoute[target] = j
               isAsync = isChildAsync
-              optional = [...optional, ...childOptional]
             }
             if (error) {
               errors.push(error.join(' -> '))
@@ -71,7 +59,7 @@ class RelationX {
         }
       }
     }
-    return { preRoute, isAsync, optional }
+    return { preRoute, isAsync }
   }
 
   parser(url, type = '_none', options) {
@@ -83,13 +71,13 @@ class RelationX {
       let target = targets[i]
       if (!object[target]) {
         let targetAPI = this.apis[target]
-        let { oneOf = [], demand = [], type, optional = [] } = targetAPI
+        let { oneOf = [], demand = [], type } = targetAPI
         let oneOfDemand = oneOf[preRoute[target]] || []
         this.get({ object, targets: [...demand, ...oneOfDemand], preRoute, isAsync }, options)
         if (isAsync) {
-          object[target] = (async () => this.parser(await targetAPI.get(Object.fromEntries(await Promise.all([...demand, ...oneOfDemand, ...optional].map(async v => [v, await object[v]]))), options), type, options))()
+          object[target] = (async () => this.parser(await targetAPI.get(Object.fromEntries(await Promise.all(demand.concat(...oneOfDemand).map(async v => [v, await object[v]]))), options), type, options))()
         } else {
-          object[target] = this.parser(targetAPI.get(Object.fromEntries([...demand, ...oneOfDemand, ...optional].map(v => [v, object[v]])), options), type, options)
+          object[target] = this.parser(targetAPI.get(Object.fromEntries(demand.concat(...oneOfDemand).map(v => [v, object[v]])), options), type, options)
         }
         // Hiahiahia
       }
@@ -97,12 +85,11 @@ class RelationX {
   }
 
   solve({ object = {}, targets = [], options = {} }) {
-    let { error, preRoute, isAsync, optional } = this.router({ object, targets })
+    let { error, preRoute, isAsync } = this.router({ object, targets })
     if (error) {
       throw new Error(`Target route: ${error.join(' -> ')}`)
     }
-    console.log(optional)
-    this.get({ object, targets: [...optional, ...targets], preRoute, isAsync }, options)
+    this.get({ object, targets, preRoute, isAsync }, options)
     if (isAsync || options.async) {
       return new Promise(async resolve => resolve(Object.fromEntries(await Promise.all(Object.entries(object).map(async ([key, value]) => [key, await value])))))
     } else {
