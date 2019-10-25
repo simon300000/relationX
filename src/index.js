@@ -84,13 +84,13 @@ class RelationX {
     }
   }
 
-  solve({ object = {}, targets = [], options = {} }) {
+  solve({ object = {}, targets = [], options }) {
     let { error, preRoute, isAsync } = this.router({ object, targets })
     if (error) {
       throw new Error(`Target route: ${error.join(' -> ')}`)
     }
     this.get({ object, targets, preRoute, isAsync }, options)
-    if (isAsync || options.async) {
+    if (isAsync) {
       return new Promise(async resolve => resolve(Object.fromEntries(await Promise.all(Object.entries(object).map(async ([key, value]) => [key, await value])))))
     } else {
       return object

@@ -226,12 +226,6 @@ describe('RelationX', function() {
         let { wowAsyncMassDouble, mass } = await pending
         assert.strictEqual(wowAsyncMassDouble, `${mass}${mass}`)
       })
-      it('force async', function() {
-        let density = 3
-        let volume = 30
-        let pending = relation({ density, volume }, ['mass'], { async: true })
-        assert.instanceOf(pending, Promise)
-      })
     })
   })
 })
