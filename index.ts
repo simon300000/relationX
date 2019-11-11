@@ -1,1 +1,2 @@
-export = require('./src')
+import AtHome from './src'
+export = AtHome
