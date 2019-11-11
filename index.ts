@@ -1,2 +1,2 @@
-import AtHome from './src'
-export = AtHome
+import RelationX from './src'
+export = RelationX
