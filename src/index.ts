@@ -80,7 +80,7 @@ class RelationX {
   async get({ object, targets, preRoute }: { object: Obj, targets: Tar, preRoute: preRoute }, options: any) {
     for (let i = 0; i < targets.length; i++) {
       let target = targets[i]
-      if (!object[target]) {
+      if (object[target] === undefined) {
         let targetAPI = this.apis[target]
         let { oneOf = [], demand = [], type } = targetAPI
         let oneOfDemand = oneOf[preRoute[target]] || []
